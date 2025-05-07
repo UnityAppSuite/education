@@ -38,8 +38,7 @@
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Instructor",
-   "options": "Instructor",
-   "reqd": 1
+   "options": "Instructor"
   },
   {
    "fetch_from": "instructor.instructor_name",
@@ -65,8 +64,7 @@
    "fieldtype": "Link",
    "in_global_search": 1,
    "label": "Course",
-   "options": "Course",
-   "reqd": 1
+   "options": "Course"
   },
   {
    "fieldname": "color",
@@ -88,8 +86,7 @@
    "fieldname": "room",
    "fieldtype": "Link",
    "label": "Room",
-   "options": "Room",
-   "reqd": 1
+   "options": "Room"
   },
   {
    "fieldname": "column_break_9",
