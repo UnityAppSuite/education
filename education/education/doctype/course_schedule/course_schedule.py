@@ -19,7 +19,7 @@ class CourseSchedule(Document):
 		self.validate_course()
 		self.validate_date()
 		self.validate_time()
-		self.validate_overlap()
+		# self.validate_overlap()
 
 	def set_title(self):
 		"""Set document Title"""
