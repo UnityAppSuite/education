@@ -70,7 +70,7 @@ def get_attendance_count(student, academic_year, academic_term=None):
 		data = frappe.get_all(
 			"Student Attendance",
 			{"student": student, "docstatus": 1, "date": ["between", (from_date, to_date)]},
-			["status", "count(student) as count"],
+			["status", {"COUNT": "student", "as": "count"}],
 			group_by="status",
 		)
 
