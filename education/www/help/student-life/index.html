@@ -1,0 +1,735 @@
+{% extends "templates/web.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block page_content %}
+<div class="ws-help-page">
+	<header class="ws-help-hero">
+		<a class="ws-help-brand" href="/" aria-label="Walnut School home">
+			<span class="ws-help-logo-mark" aria-hidden="true">W</span>
+			<span>Walnut School Help</span>
+		</a>
+		<p class="ws-help-eyebrow">Simple help for parents and school staff</p>
+		<h1>Student life</h1>
+		<p class="ws-help-intro">Find the most useful school information in a clean mobile view. This prototype reuses existing Wiki content without showing the default Wiki layout.</p>
+	</header>
+
+	<div class="ws-help-shell">
+		<aside class="ws-help-menu-card" aria-label="Help topics">
+			<div class="ws-help-menu-title">Topics</div>
+			<button class="ws-help-menu-trigger" type="button" aria-haspopup="dialog" aria-controls="ws-help-drawer" aria-expanded="false">
+				<span>{{ menu_label }}</span>
+				<span class="ws-help-plus" aria-hidden="true">+</span>
+			</button>
+		</aside>
+
+		<main class="ws-help-content" id="main-content">
+			<div class="ws-help-card">
+				<div class="ws-help-card-header">
+					<p class="ws-help-section-label">Featured article</p>
+					<h2>{{ article.prototype_label or article.title }}</h2>
+					{% if article.route %}
+						<a class="ws-help-source" href="/{{ article.route }}">Source Wiki Page</a>
+					{% endif %}
+				</div>
+
+				{% if article.source_note %}
+					<div class="ws-help-note">{{ article.source_note }}</div>
+				{% endif %}
+
+				<article class="ws-help-article">
+					{{ article_html | safe }}
+				</article>
+			</div>
+		</main>
+	</div>
+
+	<div class="ws-help-drawer" id="ws-help-drawer" role="dialog" aria-modal="true" aria-label="Student life help menu" hidden>
+		<div class="ws-help-drawer-panel">
+			<div class="ws-help-drawer-head">
+				<a class="ws-help-drawer-logo" href="/" aria-label="Walnut School home">
+					<span class="ws-help-logo-emblem" aria-hidden="true">⌁</span>
+					<span>WALNUT<br>SCHOOL</span>
+				</a>
+				<button class="ws-help-drawer-close" type="button" aria-label="Close menu">×</button>
+			</div>
+
+			<nav class="ws-help-drawer-list" aria-label="Help menu">
+				{% macro render_menu_nodes(nodes, level=0) %}
+					{% for node in nodes %}
+						{% if node.children %}
+							<details class="ws-help-row-details {% if level > 0 %}ws-help-row-sub{% endif %} level-{{ level }}" {% if node.open %}open{% endif %}>
+								<summary>{{ node.label }}</summary>
+								<div class="{% if level == 0 %}ws-help-row-children{% else %}ws-help-feature-links{% endif %}">
+									{{ render_menu_nodes(node.children, level + 1) }}
+								</div>
+							</details>
+						{% elif node.href %}
+							<a class="{% if node.active %}active{% endif %}" href="{{ node.href }}">{{ node.label }}</a>
+						{% else %}
+							<div class="ws-help-empty-row">{{ node.label }}</div>
+						{% endif %}
+					{% endfor %}
+				{% endmacro %}
+				{{ render_menu_nodes(menu_tree) }}
+			</nav>
+		</div>
+	</div>
+</div>
+
+<style>
+	:root {
+		--ws-help-ink: #111825;
+		--ws-help-muted: #585E6F;
+		--ws-help-line: #D0D7E9;
+		--ws-help-soft-line: #e7edf5;
+		--ws-help-bg: #f2f1f1;
+		--ws-help-card: #ffffff;
+		--ws-help-blue: #2BBAFC;
+		--ws-help-link: #048ba8;
+		--ws-help-shadow: 0 3px 12px rgba(17, 24, 37, 0.05);
+	}
+
+	html,
+	body {
+		width: 100% !important;
+		max-width: 100% !important;
+		height: auto !important;
+		min-height: 100% !important;
+		margin: 0 !important;
+		padding: 0 !important;
+		overflow-x: hidden !important;
+		overflow-y: auto !important;
+	}
+
+	.navbar,
+	.web-footer {
+		display: none !important;
+	}
+
+	.page_content,
+	.page-content-wrapper,
+	.web-page,
+	.container {
+		width: 100% !important;
+		max-width: 100% !important;
+		height: auto !important;
+		min-height: 0 !important;
+		overflow: visible !important;
+		padding-left: 0 !important;
+		padding-right: 0 !important;
+	}
+
+	.ws-help-page,
+	.ws-help-page * {
+		box-sizing: border-box;
+	}
+
+	.ws-help-page {
+		margin: 0;
+		width: 100vw;
+		max-width: 100vw;
+		min-height: 100vh;
+		overflow: visible;
+		background: var(--ws-help-bg);
+		color: var(--ws-help-ink);
+		font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+	}
+
+	.ws-help-hero {
+		width: 100%;
+		max-width: 100vw;
+		padding: 1.2rem 1rem 1.4rem;
+		background: #ffffff;
+		border-bottom: 1px solid var(--ws-help-line);
+		border-radius: 0;
+	}
+
+	.ws-help-brand {
+		display: inline-flex;
+		align-items: center;
+		gap: .7rem;
+		text-decoration: none;
+		color: var(--ws-help-ink);
+		font-weight: 800;
+	}
+
+	.ws-help-logo-mark {
+		display: inline-grid;
+		place-items: center;
+		width: 42px;
+		height: 42px;
+		border-radius: 6px;
+		background: #2BBAFC;
+		color: white;
+		font-weight: 900;
+		font-size: 1.35rem;
+		box-shadow: 0 8px 18px rgba(21, 112, 239, .18);
+	}
+
+	.ws-help-eyebrow,
+	.ws-help-section-label {
+		margin: 1.15rem 0 .4rem;
+		color: var(--ws-help-blue);
+		font-weight: 800;
+		font-size: .78rem;
+		letter-spacing: .045em;
+		text-transform: uppercase;
+	}
+
+	.ws-help-hero h1 {
+		margin: 0;
+		font-size: clamp(2.15rem, 9vw, 3.35rem);
+		line-height: 1.02;
+		letter-spacing: -.055em;
+	}
+
+	.ws-help-intro {
+		margin: .8rem 0 0;
+		max-width: 38rem;
+		color: #2f3b4e;
+		font-size: 1rem;
+		line-height: 1.55;
+	}
+
+	.ws-help-shell {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+		gap: .9rem;
+		width: 100%;
+		max-width: min(1180px, 100vw);
+		padding: .75rem;
+		margin: 0 auto;
+	}
+
+	.ws-help-menu-card,
+	.ws-help-content,
+	.ws-help-card {
+		min-width: 0;
+		width: 100%;
+		max-width: 100%;
+	}
+
+	.ws-help-menu-card,
+	.ws-help-card {
+		background: var(--ws-help-card);
+		border: 1px solid var(--ws-help-line);
+		border-radius: 6px;
+		box-shadow: var(--ws-help-shadow);
+	}
+
+	.ws-help-menu-card {
+		position: sticky;
+		top: 0;
+		z-index: 20;
+		align-self: start;
+		padding: 1rem .85rem 1rem;
+		border-radius: 0 0 6px 6px;
+	}
+
+
+	.ws-help-menu-card.is-stuck {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		width: 100vw;
+		max-width: 100vw;
+		margin: 0 auto;
+		border-left: 0;
+		border-right: 0;
+		box-shadow: 0 2px 10px rgba(17, 24, 37, .07);
+	}
+
+	.ws-help-menu-spacer {
+		display: none;
+	}
+
+	.ws-help-menu-spacer.active {
+		display: block;
+	}
+
+	.ws-help-menu-title {
+		padding: 0 .45rem .8rem;
+		font-size: .82rem;
+		font-weight: 800;
+		color: #667085;
+	}
+
+	.ws-help-menu-trigger {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		width: 100%;
+		min-height: 56px;
+		padding: 0 .95rem;
+		border: 1px solid #111825;
+		border-radius: 6px;
+		background: #fff;
+		color: var(--ws-help-ink);
+		font-weight: 800;
+		text-align: left;
+	}
+
+	.ws-help-plus {
+		color: var(--ws-help-blue);
+		font-size: 1.2rem;
+		line-height: 1;
+	}
+
+	.ws-help-card {
+		overflow: hidden;
+	}
+
+	.ws-help-card-header {
+		padding: 1.55rem 1.2rem .85rem;
+		border-bottom: 1px solid var(--ws-help-line);
+	}
+
+	.ws-help-card-header h2 {
+		margin: 0;
+		font-size: clamp(1.55rem, 7vw, 2.25rem);
+		letter-spacing: -.04em;
+	}
+
+	.ws-help-source {
+		display: inline-flex;
+		margin-top: .65rem;
+		color: var(--ws-help-blue);
+		font-weight: 800;
+		text-decoration: none;
+	}
+
+	.ws-help-note {
+		margin: 1rem 1rem 0;
+		padding: .75rem .9rem;
+		border-radius: 6px;
+		background: #fff9e8;
+		border: 1px solid #EDAE49;
+		color: #7a3f00;
+		font-size: .92rem;
+		line-height: 1.45;
+	}
+
+	.ws-help-article {
+		min-width: 0;
+		max-width: 100%;
+		overflow-x: auto;
+		padding: 1.15rem;
+		font-size: 1rem;
+		line-height: 1.75;
+		color: #243044;
+	}
+
+	.ws-help-article :is(h1, h2, h3, h4) {
+		color: var(--ws-help-ink);
+		line-height: 1.22;
+		margin: 1.25rem 0 .6rem;
+	}
+
+	.ws-help-article h3 {
+		color: #5a92d8;
+		font-weight: 850;
+	}
+
+	.ws-help-article :is(p, ul, ol) {
+		margin-bottom: 1rem;
+	}
+
+	.ws-help-article ul,
+	.ws-help-article ol {
+		padding-left: 1.25rem;
+	}
+
+	.ws-help-article li {
+		margin: .45rem 0;
+	}
+
+	.ws-help-article div,
+	.ws-help-article p,
+	.ws-help-article h1,
+	.ws-help-article h2,
+	.ws-help-article h3,
+	.ws-help-article h4,
+	.ws-help-article ul,
+	.ws-help-article ol {
+		max-width: 100% !important;
+	}
+
+	.ws-help-article img,
+	.ws-help-article video,
+	.ws-help-article iframe {
+		max-width: 100% !important;
+		width: auto !important;
+		height: auto !important;
+		border-radius: 6px;
+	}
+
+	.ws-help-article > div {
+		overflow-x: auto;
+	}
+
+	.ws-help-article table {
+		display: block;
+		width: max-content;
+		max-width: 100%;
+		overflow-x: auto;
+		border-collapse: collapse;
+	}
+
+	.ws-help-article :is(th, td) {
+		padding: .65rem;
+		border: 1px solid var(--ws-help-line);
+		vertical-align: top;
+	}
+
+
+	@media (max-width: 640px) {
+		.ws-help-article table.ws-help-mobile-table {
+			display: table;
+			width: 100% !important;
+			max-width: 100% !important;
+			border: 0;
+			overflow: visible;
+		}
+
+		.ws-help-article table.ws-help-mobile-table thead {
+			display: none;
+		}
+
+		.ws-help-article table.ws-help-mobile-table tbody,
+		.ws-help-article table.ws-help-mobile-table tr,
+		.ws-help-article table.ws-help-mobile-table td {
+			display: block;
+			width: 100% !important;
+			max-width: 100% !important;
+		}
+
+		.ws-help-article table.ws-help-mobile-table tr {
+			margin: 0 0 .9rem;
+			border: 1px solid var(--ws-help-line);
+			border-radius: 6px;
+			background: #fff;
+			overflow: hidden;
+		}
+
+		.ws-help-article table.ws-help-mobile-table td {
+			border: 0;
+			border-bottom: 1px solid var(--ws-help-soft-line);
+			padding: .72rem .8rem;
+			text-align: left !important;
+			white-space: normal !important;
+		}
+
+		.ws-help-article table.ws-help-mobile-table td:last-child {
+			border-bottom: 0;
+		}
+
+		.ws-help-article table.ws-help-mobile-table td::before {
+			content: attr(data-label);
+			display: block;
+			margin-bottom: .18rem;
+			color: var(--ws-help-muted);
+			font-size: .72rem;
+			font-weight: 800;
+			letter-spacing: .04em;
+			text-transform: uppercase;
+		}
+	}
+
+	.ws-help-drawer[hidden] {
+		display: none !important;
+	}
+
+	.ws-help-drawer {
+		position: fixed;
+		inset: 0;
+		z-index: 9999;
+		background: rgba(15, 23, 42, .22);
+	}
+
+	.ws-help-drawer-panel {
+		width: min(100vw, 430px);
+		height: 100dvh;
+		max-height: 100dvh;
+		overflow-y: auto;
+		background: #fff;
+		border: 1px solid #cbd5e1;
+		border-radius: 6px;
+		box-shadow: 0 12px 38px rgba(17, 24, 37, .18);
+	}
+
+	.ws-help-drawer-head {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		padding: .75rem 1.25rem 1.9rem;
+		border-bottom: 1px solid #e5e7eb;
+	}
+
+	.ws-help-drawer-logo {
+		display: inline-flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: .15rem;
+		width: 73px;
+		height: 73px;
+		border-radius: 6px;
+		background: #111825;
+		color: #fff;
+		text-decoration: none;
+		font-size: .58rem;
+		font-weight: 900;
+		line-height: 1.05;
+		letter-spacing: .04em;
+		text-align: center;
+	}
+
+	.ws-help-logo-emblem {
+		font-size: 1.2rem;
+		line-height: 1;
+	}
+
+	.ws-help-drawer-close {
+		border: 0;
+		background: transparent;
+		color: #111825;
+		font-size: 2rem;
+		line-height: 1;
+		padding: .45rem 0 .45rem .8rem;
+	}
+
+	.ws-help-drawer-list {
+		border-top: 1px solid #111827;
+	}
+
+	.ws-help-row-details {
+		border-bottom: 1px solid #e8eaef;
+	}
+
+	.ws-help-row-details summary {
+		position: relative;
+		list-style: none;
+		cursor: pointer;
+		padding: .78rem 2.9rem .78rem 1.25rem;
+		min-height: 46px;
+		font-size: 1rem;
+		line-height: 1.25;
+		font-weight: 800;
+		color: #111825;
+		background: #fff;
+	}
+
+	.ws-help-row-details summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.ws-help-row-details summary::after {
+		content: "⌄";
+		position: absolute;
+		right: 1rem;
+		top: 50%;
+		transform: translateY(-50%);
+		font-size: 1.1rem;
+		font-weight: 400;
+		color: #111827;
+	}
+
+	.ws-help-row-details[open] > summary::after {
+		content: "⌃";
+	}
+
+	.ws-help-row-sub {
+		border-top: 1px solid #111827;
+		border-bottom: 1px solid #111827;
+	}
+
+	.ws-help-row-sub > summary {
+		background: #f7f7f7;
+		padding-left: 2.55rem;
+	}
+
+	.ws-help-feature-links a {
+		display: block;
+		padding: .72rem 1.25rem .72rem 3.35rem;
+		border-top: 1px solid #eef0f2;
+		color: var(--ws-help-link);
+		font-weight: 700;
+		text-decoration: none;
+	}
+
+	.ws-help-feature-links a.active {
+		color: #048ba8;
+		background: #fff;
+	}
+
+	.ws-help-empty-row {
+		padding: .75rem 1.25rem 1rem;
+		color: var(--ws-help-muted);
+		font-size: .9rem;
+		background: #fafafa;
+	}
+
+	body.ws-help-menu-open {
+		overflow: hidden !important;
+	}
+
+	@media (min-width: 900px) {
+		.ws-help-hero {
+			padding: 2rem max(2rem, calc((100vw - 1180px) / 2)) 2.4rem;
+		}
+
+		.ws-help-shell {
+			grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+			align-items: start;
+			padding: 1.5rem 1rem 3rem;
+		}
+
+		.ws-help-menu-card {
+			top: 1rem;
+			border-radius: 6px;
+		}
+
+		.ws-help-card-header,
+		.ws-help-article {
+			padding-left: 1.6rem;
+			padding-right: 1.6rem;
+		}
+	}
+</style>
+
+<script>
+	(function () {
+		const drawer = document.getElementById("ws-help-drawer");
+		const trigger = document.querySelector(".ws-help-menu-trigger");
+		const close = document.querySelector(".ws-help-drawer-close");
+		const menuCard = document.querySelector(".ws-help-menu-card");
+		if (!drawer || !trigger || !close || !menuCard) return;
+
+		const spacer = document.createElement("div");
+		spacer.className = "ws-help-menu-spacer";
+		menuCard.after(spacer);
+
+		let stickyPoint = 0;
+
+		function measureStickyPoint() {
+			menuCard.classList.remove("is-stuck");
+			spacer.classList.remove("active");
+			spacer.style.height = "0px";
+			stickyPoint = menuCard.getBoundingClientRect().top + window.scrollY;
+		}
+
+		function updateStickyMenu() {
+			if (window.matchMedia("(min-width: 900px)").matches) {
+				menuCard.classList.remove("is-stuck");
+				spacer.classList.remove("active");
+				return;
+			}
+
+			const shouldStick = window.scrollY >= stickyPoint;
+			if (shouldStick && !menuCard.classList.contains("is-stuck")) {
+				spacer.style.height = menuCard.offsetHeight + "px";
+				spacer.classList.add("active");
+				menuCard.classList.add("is-stuck");
+			} else if (!shouldStick && menuCard.classList.contains("is-stuck")) {
+				menuCard.classList.remove("is-stuck");
+				spacer.classList.remove("active");
+				spacer.style.height = "0px";
+			}
+		}
+
+		function openMenu() {
+			drawer.hidden = false;
+			document.body.classList.add("ws-help-menu-open");
+			trigger.setAttribute("aria-expanded", "true");
+			close.focus();
+		}
+
+		function closeMenu() {
+			drawer.hidden = true;
+			document.body.classList.remove("ws-help-menu-open");
+			trigger.setAttribute("aria-expanded", "false");
+			trigger.focus();
+		}
+
+
+		function wikiRouteFromUrl(href) {
+			if (!href) return "";
+			let url;
+			try {
+				url = new URL(href, window.location.origin);
+			} catch (error) {
+				return "";
+			}
+
+			const host = url.hostname.toLowerCase();
+			const isWalnutWikiHost = host === window.location.hostname.toLowerCase()
+				|| host === "uat.unityedu.tech"
+				|| host === "erp.walnutedu.in";
+			const route = url.pathname.replace(/^\/+/, "");
+			if (!isWalnutWikiHost || !route.startsWith("Std-1-to-10/")) return "";
+			return route;
+		}
+
+		function helpHrefForWikiRoute(route) {
+			return "/help/student-life?source=" + encodeURIComponent(route);
+		}
+
+		function rewriteInternalWikiLinks() {
+			document.querySelectorAll(".ws-help-page a[href]").forEach(function (link) {
+				const route = wikiRouteFromUrl(link.getAttribute("href"));
+				if (!route) return;
+				link.setAttribute("href", helpHrefForWikiRoute(route));
+				link.dataset.helpSourceRoute = route;
+			});
+		}
+
+		function interceptInternalWikiLinks(event) {
+			const link = event.target.closest("a[href]");
+			if (!link || !document.querySelector(".ws-help-page").contains(link)) return;
+			const route = link.dataset.helpSourceRoute || wikiRouteFromUrl(link.getAttribute("href"));
+			if (!route) return;
+			event.preventDefault();
+			window.location.href = helpHrefForWikiRoute(route);
+		}
+
+
+		function enhanceArticleTables() {
+			document.querySelectorAll(".ws-help-article table").forEach(function (table) {
+				const headers = Array.from(table.querySelectorAll("thead th")).map(function (cell) {
+					return (cell.innerText || cell.textContent || "").trim();
+				});
+				if (!headers.length) return;
+				table.classList.add("ws-help-mobile-table");
+				table.querySelectorAll("tbody tr").forEach(function (row) {
+					Array.from(row.children).forEach(function (cell, index) {
+						if (cell.tagName.toLowerCase() !== "td") return;
+						cell.setAttribute("data-label", headers[index] || "");
+					});
+				});
+			});
+		}
+
+		rewriteInternalWikiLinks();
+		enhanceArticleTables();
+		document.addEventListener("click", interceptInternalWikiLinks);
+		measureStickyPoint();
+		updateStickyMenu();
+		window.addEventListener("scroll", updateStickyMenu, { passive: true });
+		window.addEventListener("resize", function () {
+			measureStickyPoint();
+			updateStickyMenu();
+		});
+
+		trigger.addEventListener("click", openMenu);
+		close.addEventListener("click", closeMenu);
+		drawer.addEventListener("click", function (event) {
+			if (event.target === drawer) closeMenu();
+		});
+		document.addEventListener("keydown", function (event) {
+			if (event.key === "Escape" && !drawer.hidden) closeMenu();
+		});
+	})();
+</script>
+{% endblock %}
